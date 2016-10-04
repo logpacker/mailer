@@ -34,7 +34,7 @@ func main() {
 	version := flag.Bool("v", false, "Build version (git revision)")
 	help := flag.Bool("h", false, "Usage & Help")
 	apiKey := flag.String("a", "", "Set secret api_key. If empty API will be accessible without token")
-	p := flag.String("p", "6100", "API port, always binded to localhost")
+	p := flag.String("p", "6100", "API port to bind")
 	flag.String("s", "localhost:25", "SMTP address")
 	flag.Parse()
 	if *help {

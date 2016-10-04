@@ -11,6 +11,7 @@ var (
 	tokensMu    sync.Mutex
 	tokens      map[string]string
 	validAPIKey string
+	//db          *db.Client
 )
 
 // Context type
@@ -56,8 +57,8 @@ func (c *Context) writeErrorResponse(w web.ResponseWriter, r *web.Request, err e
 // NewRouter - constructor
 func NewRouter(apiKey string) *web.Router {
 	validAPIKey = apiKey
-
 	tokens = make(map[string]string)
+
 	router := web.New(Context{}).
 		Middleware(web.LoggerMiddleware).
 		Middleware((*Context).checkToken).

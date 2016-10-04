@@ -5,7 +5,7 @@
 
 #### Deployment dependencies:
 
- * [goose](https://bitbucket.org/liamstask/goose/)
+ * [goose](https://bitbucket.org/liamstask/goose/). Create a DB first: `CREATE DATABASE mailer CHARACTER SET utf8 COLLATE utf8_general_ci;`
  * [glide](https://github.com/Masterminds/glide)
 
 #### Development
