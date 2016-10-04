@@ -1,6 +1,7 @@
 #### Dependencies
 
  * MySQL
+ * SMTP
 
 #### Deployment dependencies:
 
@@ -14,14 +15,23 @@
 #### Build
 
 ```bash
-go build -ldflags "-X main.Version=$(git rev-parse HEAD) -X main.APIKey=secret" -o mailer_api cmd/api/main.go
+go build -ldflags "-X main.Version=$(git rev-parse HEAD)" -o mailer_api cmd/api/main.go
 go generate cmd/api/main.go
 ```
 
-#### Usage
+#### Usage and Flags
 
- - `./mailer_api -v` - shows build version
- - `./mailer_api -a secret` - starts API with 'secret' api_key
+```bash
+./mailer_api -h
+
+Usage of mailer_api:
+  -a string
+    	Ser secret api_key
+  -h	Usage & Help
+  -s string
+    	SMTP address (default "localhost:25")
+  -v	Build version (git revision)
+```
 
 #### How does it work
 

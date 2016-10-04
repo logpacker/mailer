@@ -30,21 +30,21 @@ import (
 // Version var
 var Version string
 
-// APIKey var
-var APIKey string
-
 func main() {
-	version := flag.Bool("v", false, "cmd version")
-	apiKey := flag.String("a", "", "authorized api key")
+	version := flag.Bool("v", false, "Build version (git revision)")
+	help := flag.Bool("h", false, "Usage & Help")
+	apiKey := flag.String("a", "", "Ser secret api_key")
+	flag.String("s", "localhost:25", "SMTP address")
 	flag.Parse()
+	if *help {
+		flag.Usage()
+		os.Exit(0)
+	}
 	if *version {
 		fmt.Println(Version)
 		os.Exit(0)
 	}
-	if *apiKey != "" {
-		APIKey = *apiKey
-	}
 
-	r := api.NewRouter(APIKey)
+	r := api.NewRouter(*apiKey)
 	log.Println(http.ListenAndServe(":6100", context.ClearHandler(r)))
 }

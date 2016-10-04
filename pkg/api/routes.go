@@ -71,7 +71,8 @@ func NewRouter(apiKey string) *web.Router {
 	router := web.New(Context{}).
 		Middleware(web.LoggerMiddleware).
 		Middleware((*Context).checkToken).
-		Get("/v1/token", (*Context).token)
+		Get("/v1/token", (*Context).token).
+		Put("/v1/send", (*Context).send)
 
 	return router
 }
@@ -90,7 +91,7 @@ func NewRouter(apiKey string) *web.Router {
 //
 //     Responses:
 //       401: errorResponse
-//       200: accessTokenResponse
+//       200: tokenResponse
 func (c *Context) token(w web.ResponseWriter, r *web.Request) {
 	if c.APIKey != validAPIKey {
 		c.writeResponse(w, r, errorResponse{
@@ -103,7 +104,26 @@ func (c *Context) token(w web.ResponseWriter, r *web.Request) {
 	tokens[c.APIKey] = "token"
 	tokensMu.Unlock()
 
-	c.writeResponse(w, r, accessTokenResponse{
+	c.writeResponse(w, r, tokenResponse{
 		Token: tokens[c.APIKey],
 	})
+}
+
+// swagger:route PUT /v1/send sendParams
+//
+// Send email
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+//
+//     Schemes: http
+//
+//     Responses:
+//       401: errorResponse
+//       200: sendResponse
+func (c *Context) send(w web.ResponseWriter, r *web.Request) {
+	c.writeResponse(w, r, sendResponse{})
 }

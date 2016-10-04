@@ -7,10 +7,16 @@ type tokenParams struct {
 	// Required: true
 	APIKey string `json:"api_key"`
 }
+
+// swagger:response errorResponse
 type errorResponse struct {
 	Message string `json:"message"`
 }
 
-type accessTokenResponse struct {
+// swagger:response tokenResponse
+type tokenResponse struct {
 	Token string `json:"token"`
 }
+
+// swagger:response sendResponse
+type sendResponse struct{}
