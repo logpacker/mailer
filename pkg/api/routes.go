@@ -14,37 +14,19 @@ var (
 )
 
 // Context type
-type Context struct {
-	APIKey string
-	Token  string
-}
+type Context struct{}
 
 func (c *Context) checkToken(w web.ResponseWriter, r *web.Request, next web.NextMiddlewareFunc) {
-	c.APIKey = r.FormValue("api_key")
-	c.Token = r.FormValue("token")
-	if c.APIKey == "" {
-		c.writeResponse(w, r, errorResponse{
-			Message: "'api_key' param is empty. API requests are forbidden",
-		})
-		return
-	}
+	r.ParseForm()
 
 	if r.URL.Path != "/v1/token" {
-		if c.Token == "" {
-			c.writeResponse(w, r, errorResponse{
-				Message: "'token' param is empty. Get new token via 'GET /v1/token'",
-			})
-			return
+		p := accessParams{
+			APIKey: r.FormValue("api_key"),
+			Token:  r.FormValue("token"),
 		}
 
-		tokensMu.Lock()
-		t, _ := tokens[c.APIKey]
-		tokensMu.Unlock()
-
-		if t != c.Token {
-			c.writeResponse(w, r, errorResponse{
-				Message: "'token' is not valid. Get new token via 'GET /v1/token'",
-			})
+		if err := validateAccessParams(p); err != nil {
+			c.writeErrorResponse(w, r, err)
 			return
 		}
 	}
@@ -63,6 +45,14 @@ func (c *Context) writeResponse(w web.ResponseWriter, r *web.Request, response i
 	w.Write(json)
 }
 
+func (c *Context) writeErrorResponse(w web.ResponseWriter, r *web.Request, err error) {
+	if err != nil {
+		c.writeResponse(w, r, errorResponse{
+			Message: err.Error(),
+		})
+	}
+}
+
 // NewRouter - constructor
 func NewRouter(apiKey string) *web.Router {
 	validAPIKey = apiKey
@@ -72,7 +62,7 @@ func NewRouter(apiKey string) *web.Router {
 		Middleware(web.LoggerMiddleware).
 		Middleware((*Context).checkToken).
 		Get("/v1/token", (*Context).token).
-		Put("/v1/send", (*Context).send)
+		Post("/v1/send", (*Context).send)
 
 	return router
 }
@@ -93,23 +83,25 @@ func NewRouter(apiKey string) *web.Router {
 //       401: errorResponse
 //       200: tokenResponse
 func (c *Context) token(w web.ResponseWriter, r *web.Request) {
-	if c.APIKey != validAPIKey {
-		c.writeResponse(w, r, errorResponse{
-			Message: "'api_key' is not valid",
-		})
+	p := tokenParams{
+		APIKey: r.FormValue("api_key"),
+	}
+
+	if err := validateTokenParams(p); err != nil {
+		c.writeErrorResponse(w, r, err)
 		return
 	}
 
 	tokensMu.Lock()
-	tokens[c.APIKey] = "token"
+	tokens[p.APIKey] = "token"
 	tokensMu.Unlock()
 
 	c.writeResponse(w, r, tokenResponse{
-		Token: tokens[c.APIKey],
+		Token: tokens[p.APIKey],
 	})
 }
 
-// swagger:route PUT /v1/send sendParams
+// swagger:route POST /v1/send sendParams
 //
 // Send email
 //
@@ -125,5 +117,22 @@ func (c *Context) token(w web.ResponseWriter, r *web.Request) {
 //       401: errorResponse
 //       200: sendResponse
 func (c *Context) send(w web.ResponseWriter, r *web.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var b sendBody
+	jsonErr := decoder.Decode(&b)
+	if jsonErr != nil {
+		c.writeErrorResponse(w, r, jsonErr)
+		return
+	}
+
+	p := sendParams{
+		Body: b,
+	}
+
+	if err := validateSendParams(p); err != nil {
+		c.writeErrorResponse(w, r, err)
+		return
+	}
+
 	c.writeResponse(w, r, sendResponse{})
 }

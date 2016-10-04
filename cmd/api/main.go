@@ -33,7 +33,8 @@ var Version string
 func main() {
 	version := flag.Bool("v", false, "Build version (git revision)")
 	help := flag.Bool("h", false, "Usage & Help")
-	apiKey := flag.String("a", "", "Ser secret api_key")
+	apiKey := flag.String("a", "", "Set secret api_key. If empty API will be accessible without token")
+	p := flag.String("p", "6100", "API port, always binded to localhost")
 	flag.String("s", "localhost:25", "SMTP address")
 	flag.Parse()
 	if *help {
@@ -46,5 +47,5 @@ func main() {
 	}
 
 	r := api.NewRouter(*apiKey)
-	log.Println(http.ListenAndServe(":6100", context.ClearHandler(r)))
+	log.Println(http.ListenAndServe(fmt.Sprintf(":%s", *p), context.ClearHandler(r)))
 }

@@ -1,0 +1,6 @@
+development:
+  driver: mysql
+  open: root@tcp(127.0.0.1:3306)/weelco?charset=utf8&parseTime=true
+live:
+  driver: mysql
+  open: root@tcp(127.0.0.1:3306)/weelco?charset=utf8&parseTime=true
