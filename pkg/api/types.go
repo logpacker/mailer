@@ -33,7 +33,7 @@ type sendParams struct {
 	// in: query
 	// Required: true
 	Token string `json:"token"`
-	// Body parameters
+	// Body parameters. body.body must be a valid HTML inside a <body></body>
 	// in: body
 	// Required: true
 	Body shared.Email `json:"body"`

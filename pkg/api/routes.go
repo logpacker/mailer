@@ -143,6 +143,12 @@ func (c *Context) send(w web.ResponseWriter, r *web.Request) {
 		return
 	}
 
+	prepareErr := prepareEmail(&b)
+	if prepareErr != nil {
+		c.writeErrorResponse(w, r, prepareErr)
+		return
+	}
+
 	saveErr := dbClient.SaveEmail(&b)
 	if saveErr != nil {
 		c.writeErrorResponse(w, r, saveErr)

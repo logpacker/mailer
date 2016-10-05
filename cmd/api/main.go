@@ -37,7 +37,6 @@ func main() {
 	help := flag.Bool("h", false, "Usage & Help")
 	apiKey := flag.String("a", "", "Set secret api_key. If empty API will be accessible without token")
 	p := flag.String("p", "6100", "API port to bind")
-	smtp := flag.String("s", "localhost:25", "SMTP address")
 	db := flag.String("db", "root@tcp(127.0.0.1:3306)/mailer", "MySQL database connection string")
 	*db += "?charset=utf8&parseTime=true"
 	flag.Parse()
@@ -51,7 +50,6 @@ func main() {
 	}
 
 	conf := new(conf.MailerConfig)
-	conf.SMTPAddr = *smtp
 	conf.MySQLAddr = *db
 
 	r := api.NewRouter(*apiKey, conf)

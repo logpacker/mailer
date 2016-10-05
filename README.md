@@ -7,6 +7,7 @@
 
  * [goose](https://bitbucket.org/liamstask/goose/). Create a DB first: `CREATE DATABASE mailer CHARACTER SET utf8 COLLATE utf8_general_ci;`
  * [glide](https://github.com/Masterminds/glide)
+ * `go test ./pkg/... -v -cover`
 
 #### Development
 
@@ -16,6 +17,8 @@
 
 ```bash
 go build -ldflags "-X main.Version=$(git rev-parse HEAD)" -o mailer_api cmd/api/main.go
+go build -ldflags "-X main.Version=$(git rev-parse HEAD)" -o mailer_daemon cmd/daemon/main.go
+# Generate swagger.json
 go generate cmd/api/main.go
 ```
 
@@ -32,6 +35,16 @@ Usage of mailer_api:
   -h	Usage & Help
   -p string
     	API port to bind (default "6100")
+  -v	Build version (git revision)
+```
+
+```bash
+./mailer_daemon -h
+
+Usage of mailer_daemon:
+  -db string
+    	MySQL database connection string (default "root@tcp(127.0.0.1:3306)/mailer")
+  -h	Usage & Help
   -s string
     	SMTP address (default "localhost:25")
   -v	Build version (git revision)

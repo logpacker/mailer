@@ -5,6 +5,12 @@ import (
 	// Commented for lint
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/logpacker/mailer/pkg/shared"
+	"time"
+)
+
+var (
+	// StatusPending var
+	StatusPending = "Pending"
 )
 
 // MySQLClient struct
@@ -22,7 +28,8 @@ func (s *MySQLClient) Init(addr string) error {
 	if err == nil {
 		s.Stmts["get_address_id"], _ = s.Conn.Prepare("SELECT id FROM address WHERE email = ? AND is_sender = ?")
 		s.Stmts["insert_address"], _ = s.Conn.Prepare("INSERT INTO address (email, name, is_sender) VALUES (?, ?, ?)")
-		s.Stmts["insert_email"], _ = s.Conn.Prepare("INSERT INTO email (`from`, `to`, subject, html) VALUES (?, ?, ?, ?)")
+		s.Stmts["insert_email"], _ = s.Conn.Prepare("INSERT INTO email (`from`, `to`, subject, body, url_unsubscribe) VALUES (?, ?, ?, ?, ?)")
+		s.Stmts["get_emails_by_status"], _ = s.Conn.Prepare("SELECT *, a1.email AS a1_email, a1.name AS a1_name, a2.email AS a2_email, a2.name AS a2_name FROM email AS e INNER JOIN address AS a1 ON e.`from` = a1.id INNER JOIN address AS a2 ON e.`to` = a2.id WHERE status = ?")
 	}
 
 	return err
@@ -45,7 +52,7 @@ func (s *MySQLClient) SaveEmail(email *shared.Email) error {
 		return err
 	}
 
-	res, err = s.Stmts["insert_email"].Exec(email.From.ID, email.To.ID, email.Subject, email.HTML)
+	res, err = s.Stmts["insert_email"].Exec(email.From.ID, email.To.ID, email.Subject, email.Body, email.URLUnsubscribe)
 	if err != nil {
 		return err
 	}
@@ -53,6 +60,64 @@ func (s *MySQLClient) SaveEmail(email *shared.Email) error {
 	email.ID, err = res.LastInsertId()
 
 	return err
+}
+
+// GetEmails func
+func (s *MySQLClient) GetEmails(status string) ([]shared.Email, error) {
+	var (
+		err            error
+		rows           *sql.Rows
+		emails         []shared.Email
+		id             sql.NullInt64
+		fromID         sql.NullInt64
+		fromEmail      sql.NullString
+		fromName       sql.NullString
+		toID           sql.NullInt64
+		toEmail        sql.NullString
+		toName         sql.NullString
+		subject        sql.NullString
+		body           sql.NullString
+		urlUnsubscribe sql.NullString
+		statusID       sql.NullInt64
+		createdAt      *time.Time
+		sentAt         *time.Time
+		openedAt       *time.Time
+	)
+
+	rows, err = s.Stmts["get_emails_by_status"].Query(status)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		scanErr := rows.Scan(&id, &fromID, &toID, &subject, &body, &urlUnsubscribe, &status, &createdAt, &sentAt, &openedAt, &fromEmail, &fromName, &toEmail, &toName)
+
+		if scanErr == nil {
+			email := shared.Email{
+				ID: id.Int64,
+				From: &shared.Address{
+					ID:    fromID.Int64,
+					Email: fromEmail.String,
+					Name:  fromName.String,
+				},
+				To: &shared.Address{
+					ID:    toID.Int64,
+					Email: toEmail.String,
+					Name:  toName.String,
+				},
+				Subject:        subject.String,
+				Body:           body.String,
+				URLUnsubscribe: urlUnsubscribe.String,
+				Status:         statusID.Int64,
+				CreatedAt:      createdAt,
+				SentAt:         sentAt,
+				OpenedAt:       openedAt,
+			}
+			emails = append(emails, email)
+		}
+	}
+
+	return emails, nil
 }
 
 func (s *MySQLClient) getAddressID(address *shared.Address) error {

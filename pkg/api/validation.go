@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 )
 
@@ -54,8 +55,11 @@ func validateSendParams(p sendParams) error {
 	if p.Body.Subject == "" {
 		return fmt.Errorf("'body.subject' is empty")
 	}
-	if p.Body.HTML == "" {
-		return fmt.Errorf("'body.html' is empty")
+	if p.Body.Body == "" {
+		return fmt.Errorf("'body.body' is empty")
+	}
+	if p.Body.URLUnsubscribe == "" {
+		return fmt.Errorf("'body.url_unsubscribe' is empty")
 	}
 
 	if p.Body.From.Email == "" {
@@ -73,6 +77,11 @@ func validateSendParams(p sendParams) error {
 	}
 	if !regexpEmail.Match([]byte(p.Body.To.Email)) {
 		return fmt.Errorf("'body.to.email' is invalid")
+	}
+
+	urlRes, urlErr := url.Parse(p.Body.URLUnsubscribe)
+	if urlErr != nil || urlRes.Host == "" {
+		return fmt.Errorf("'body.url_unsubscribe' is not a valid URL")
 	}
 
 	return nil
