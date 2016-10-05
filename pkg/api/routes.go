@@ -3,6 +3,9 @@ package api
 import (
 	"encoding/json"
 	"github.com/gocraft/web"
+	"github.com/logpacker/mailer/pkg/conf"
+	"github.com/logpacker/mailer/pkg/db"
+	"github.com/logpacker/mailer/pkg/shared"
 	"net/http"
 	"sync"
 )
@@ -11,7 +14,7 @@ var (
 	tokensMu    sync.Mutex
 	tokens      map[string]string
 	validAPIKey string
-	//db          *db.Client
+	dbClient    *db.MySQLClient
 )
 
 // Context type
@@ -55,9 +58,14 @@ func (c *Context) writeErrorResponse(w web.ResponseWriter, r *web.Request, err e
 }
 
 // NewRouter - constructor
-func NewRouter(apiKey string) *web.Router {
+func NewRouter(apiKey string, conf *conf.MailerConfig) *web.Router {
 	validAPIKey = apiKey
 	tokens = make(map[string]string)
+	dbClient = new(db.MySQLClient)
+	dbErr := dbClient.Init(conf.MySQLAddr)
+	if dbErr != nil {
+		panic(dbErr)
+	}
 
 	router := web.New(Context{}).
 		Middleware(web.LoggerMiddleware).
@@ -104,7 +112,7 @@ func (c *Context) token(w web.ResponseWriter, r *web.Request) {
 
 // swagger:route POST /v1/send sendParams
 //
-// Send email
+// Adds email into the mailer queue
 //
 //     Consumes:
 //     - application/json
@@ -119,7 +127,7 @@ func (c *Context) token(w web.ResponseWriter, r *web.Request) {
 //       200: sendResponse
 func (c *Context) send(w web.ResponseWriter, r *web.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var b sendBody
+	var b shared.Email
 	jsonErr := decoder.Decode(&b)
 	if jsonErr != nil {
 		c.writeErrorResponse(w, r, jsonErr)
@@ -135,5 +143,13 @@ func (c *Context) send(w web.ResponseWriter, r *web.Request) {
 		return
 	}
 
-	c.writeResponse(w, r, sendResponse{})
+	saveErr := dbClient.SaveEmail(&b)
+	if saveErr != nil {
+		c.writeErrorResponse(w, r, saveErr)
+		return
+	}
+
+	c.writeResponse(w, r, sendResponse{
+		ID: b.ID,
+	})
 }

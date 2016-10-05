@@ -1,5 +1,9 @@
 package api
 
+import (
+	"github.com/logpacker/mailer/pkg/shared"
+)
+
 type accessParams struct {
 	// API secure key
 	// in: query
@@ -32,19 +36,7 @@ type sendParams struct {
 	// Body parameters
 	// in: body
 	// Required: true
-	Body sendBody `json:"body"`
-}
-
-type sendBody struct {
-	From    *address `json:"from"`
-	To      *address `json:"to"`
-	Subject string   `json:"subject"`
-	HTML    string   `json:"html"`
-}
-
-type address struct {
-	Email string `json:"email"`
-	Name  string `json:"name"`
+	Body shared.Email `json:"body"`
 }
 
 // swagger:response errorResponse
@@ -59,5 +51,5 @@ type tokenResponse struct {
 
 // swagger:response sendResponse
 type sendResponse struct {
-	ID string `json:"id"`
+	ID int64 `json:"id,omitempty"`
 }

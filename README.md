@@ -26,8 +26,12 @@ go generate cmd/api/main.go
 
 Usage of mailer_api:
   -a string
-    	Ser secret api_key
+    	Set secret api_key. If empty API will be accessible without token
+  -db string
+    	MySQL database connection string (default "root@tcp(127.0.0.1:3306)/mailer")
   -h	Usage & Help
+  -p string
+    	API port to bind (default "6100")
   -s string
     	SMTP address (default "localhost:25")
   -v	Build version (git revision)
