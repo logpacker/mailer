@@ -2,3 +2,4 @@ package: github.com/logpacker/mailer
 import:
 - package: github.com/gocraft/web
 - package: github.com/gorilla/context
+- package: github.com/kr/beanstalk

@@ -10,7 +10,7 @@ type Email struct {
 	Subject        string     `json:"subject"`
 	Body           string     `json:"body"`
 	URLUnsubscribe string     `json:"url_unsubscribe"`
-	Status         int64      `json:"status,omitempty"`
+	Status         *Status    `json:"status,omitempty"`
 	CreatedAt      *time.Time `json:"created_at,omitempty"`
 	SentAt         *time.Time `json:"sent_at,omitempty"`
 	OpenedAt       *time.Time `json:"opened_at,omitempty"`
@@ -22,4 +22,10 @@ type Address struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	IsSender bool   `json:"is_sender,omitempty"`
+}
+
+// Status struct
+type Status struct {
+	ID   int64  `json:"id,omitempty"`
+	Name string `json:"name"`
 }

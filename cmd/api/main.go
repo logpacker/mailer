@@ -38,6 +38,7 @@ func main() {
 	apiKey := flag.String("a", "", "Set secret api_key. If empty API will be accessible without token")
 	p := flag.String("p", "6100", "API port to bind")
 	db := flag.String("db", "root@tcp(127.0.0.1:3306)/mailer", "MySQL database connection string")
+	b := flag.String("b", "127.0.0.1:11300", "Beanstalkd connection string")
 	*db += "?charset=utf8&parseTime=true"
 	flag.Parse()
 	if *help {
@@ -51,6 +52,7 @@ func main() {
 
 	conf := new(conf.MailerConfig)
 	conf.MySQLAddr = *db
+	conf.BeanstalkdAddr = *b
 
 	r := api.NewRouter(*apiKey, conf)
 	err := http.ListenAndServe(fmt.Sprintf(":%s", *p), context.ClearHandler(r))

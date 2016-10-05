@@ -11,6 +11,15 @@ import (
 var (
 	// StatusPending var
 	StatusPending = "Pending"
+
+	// StatusProcessing var
+	StatusProcessing = "Processing"
+
+	// StatusSent var
+	StatusSent = "Sent"
+
+	// StatusFailedToSend var
+	StatusFailedToSend = "Failed to Sent"
 )
 
 // MySQLClient struct
@@ -29,7 +38,8 @@ func (s *MySQLClient) Init(addr string) error {
 		s.Stmts["get_address_id"], _ = s.Conn.Prepare("SELECT id FROM address WHERE email = ? AND is_sender = ?")
 		s.Stmts["insert_address"], _ = s.Conn.Prepare("INSERT INTO address (email, name, is_sender) VALUES (?, ?, ?)")
 		s.Stmts["insert_email"], _ = s.Conn.Prepare("INSERT INTO email (`from`, `to`, subject, body, url_unsubscribe) VALUES (?, ?, ?, ?, ?)")
-		s.Stmts["get_emails_by_status"], _ = s.Conn.Prepare("SELECT *, a1.email AS a1_email, a1.name AS a1_name, a2.email AS a2_email, a2.name AS a2_name FROM email AS e INNER JOIN address AS a1 ON e.`from` = a1.id INNER JOIN address AS a2 ON e.`to` = a2.id WHERE status = ?")
+		s.Stmts["update_email_status"], _ = s.Conn.Prepare("UPDATE email AS e, (SELECT id FROM status where name = ?) AS s SET e.status = s.id WHERE e.id = ?")
+		s.Stmts["get_emails_by_status"], _ = s.Conn.Prepare("SELECT *, a1.email AS a1_email, a1.name AS a1_name, a2.email AS a2_email, a2.name AS a2_name FROM email AS e INNER JOIN address AS a1 ON e.`from` = a1.id INNER JOIN address AS a2 ON e.`to` = a2.id INNER JOIN status AS s ON e.status = s.id WHERE s.name = ?")
 	}
 
 	return err
@@ -59,6 +69,12 @@ func (s *MySQLClient) SaveEmail(email *shared.Email) error {
 
 	email.ID, err = res.LastInsertId()
 
+	return err
+}
+
+// UpdateStatus func
+func (s *MySQLClient) UpdateStatus(email *shared.Email, status string) error {
+	_, err := s.Stmts["update_email_status"].Exec(status, email.ID)
 	return err
 }
 
@@ -108,10 +124,12 @@ func (s *MySQLClient) GetEmails(status string) ([]shared.Email, error) {
 				Subject:        subject.String,
 				Body:           body.String,
 				URLUnsubscribe: urlUnsubscribe.String,
-				Status:         statusID.Int64,
-				CreatedAt:      createdAt,
-				SentAt:         sentAt,
-				OpenedAt:       openedAt,
+				Status: &shared.Status{
+					ID: statusID.Int64,
+				},
+				CreatedAt: createdAt,
+				SentAt:    sentAt,
+				OpenedAt:  openedAt,
 			}
 			emails = append(emails, email)
 		}

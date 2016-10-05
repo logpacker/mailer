@@ -1,8 +1,12 @@
-hash: 201001f8a0d73a06de373a385854ff96636ada6bea6f7d71edc06af7ec924020
-updated: 2016-10-03T14:26:36.165632742+07:00
+hash: 7a2abcdb66141408fad4a103a66b3ab69185288c3b3d6c76dd2fad3525a8481a
+updated: 2016-10-05T13:55:22.389897514+07:00
 imports:
+- name: github.com/go-sql-driver/mysql
+  version: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
 - name: github.com/gocraft/web
   version: c8ca29bc8a1cec97abe95c662e29dd8d31aff6e3
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/kr/beanstalk
+  version: e99e1a384e4ace0401329ea37f702a2904990f91
 devImports: []

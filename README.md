@@ -2,6 +2,7 @@
 
  * MySQL
  * SMTP
+ * Beanstalkd
 
 #### Deployment dependencies:
 
@@ -26,38 +27,26 @@ go generate cmd/api/main.go
 
 ```bash
 ./mailer_api -h
-
-Usage of mailer_api:
-  -a string
-    	Set secret api_key. If empty API will be accessible without token
-  -db string
-    	MySQL database connection string (default "root@tcp(127.0.0.1:3306)/mailer")
-  -h	Usage & Help
-  -p string
-    	API port to bind (default "6100")
-  -v	Build version (git revision)
-```
-
-```bash
 ./mailer_daemon -h
-
-Usage of mailer_daemon:
-  -db string
-    	MySQL database connection string (default "root@tcp(127.0.0.1:3306)/mailer")
-  -h	Usage & Help
-  -s string
-    	SMTP address (default "localhost:25")
-  -v	Build version (git revision)
 ```
 
 #### How does it work
 
- * `Sender` sends request to `Mailer API` to save mail into the queue
- * `Mailer Daemon` sends emails from queue to `Recepient` via SMTP
+ * `Sender` sends request to `Mailer API` to save mail into the queue and DB
+ * `Mailer Daemon` sends emails from queue to `Recepient` via SMTP and updates DB
 
 Mail statuses:
 
  * Pending
+ * Processing
  * Sent
  * Failed to Send
  * Opened
+
+#### CURL Example
+
+```bash
+curl -H "Content-Type: application/json" \
+-XPOST localhost:6100/v1/send \
+-d '{"from": {"email": "mailer@logpacker.com", "name": "LogPacker"}, "to": {"email": "alexander.plutov@gmail.com"}, "subject": "Verify your email address", "Body": "<b>Thank you for the registration. Now please confirm it.</b>", "url_unsubscribe": "http://logpacker.com/unsubscribe"}'
+```

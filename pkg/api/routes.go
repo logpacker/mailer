@@ -5,6 +5,7 @@ import (
 	"github.com/gocraft/web"
 	"github.com/logpacker/mailer/pkg/conf"
 	"github.com/logpacker/mailer/pkg/db"
+	"github.com/logpacker/mailer/pkg/queue"
 	"github.com/logpacker/mailer/pkg/shared"
 	"net/http"
 	"sync"
@@ -15,6 +16,7 @@ var (
 	tokens      map[string]string
 	validAPIKey string
 	dbClient    *db.MySQLClient
+	queueClient *queue.BeanstalkdClient
 )
 
 // Context type
@@ -65,6 +67,12 @@ func NewRouter(apiKey string, conf *conf.MailerConfig) *web.Router {
 	dbErr := dbClient.Init(conf.MySQLAddr)
 	if dbErr != nil {
 		panic(dbErr)
+	}
+
+	queueClient = new(queue.BeanstalkdClient)
+	queueErr := queueClient.Init(conf.BeanstalkdAddr)
+	if queueErr != nil {
+		panic(queueErr)
 	}
 
 	router := web.New(Context{}).
@@ -152,6 +160,12 @@ func (c *Context) send(w web.ResponseWriter, r *web.Request) {
 	saveErr := dbClient.SaveEmail(&b)
 	if saveErr != nil {
 		c.writeErrorResponse(w, r, saveErr)
+		return
+	}
+
+	queueErr := queueClient.SendEmailJob(&b)
+	if queueErr != nil {
+		c.writeErrorResponse(w, r, queueErr)
 		return
 	}
 

@@ -17,9 +17,10 @@ CREATE TABLE IF NOT EXISTS status (
 ) ENGINE=InnoDB;
 TRUNCATE TABLE status;
 INSERT INTO status (id, name) VALUES (1, "Pending");
-INSERT INTO status (id, name) VALUES (2, "Sent");
-INSERT INTO status (id, name) VALUES (3, "Failed to Sent");
-INSERT INTO status (id, name) VALUES (4, "Opened");
+INSERT INTO status (id, name) VALUES (2, "Processing");
+INSERT INTO status (id, name) VALUES (3, "Sent");
+INSERT INTO status (id, name) VALUES (4, "Failed to Sent");
+INSERT INTO status (id, name) VALUES (5, "Opened");
 
 CREATE TABLE IF NOT EXISTS email (
   id INT NOT NULL AUTO_INCREMENT,
