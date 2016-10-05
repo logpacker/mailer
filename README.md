@@ -14,12 +14,18 @@
 
  * [go-swagger](https://github.com/go-swagger/go-swagger)
 
-#### Build
+#### Build & Deploy
 
 ```bash
+cd $GOPATH/src
+mkdir -p github.com/logpacker
+cd github.com/logpacker
+git clone git@github.com:logpacker/mailer.git
+cd mailer
+glide i
+goose --env=live up
 go build -ldflags "-X main.Version=$(git rev-parse HEAD)" -o mailer_api cmd/api/main.go
 go build -ldflags "-X main.Version=$(git rev-parse HEAD)" -o mailer_daemon cmd/daemon/main.go
-# Generate swagger.json
 go generate cmd/api/main.go
 ```
 
