@@ -38,7 +38,7 @@ go generate cmd/api/main.go
 
 #### How does it work
 
- * `Sender` sends request to `Mailer API` to save mail into the queue and DB
+ * `Sender` sends request to `Mailer API` to save mail into the queue
  * `Mailer Daemon` sends emails from queue to `Recepient` via SMTP and updates DB
 
 Mail statuses:

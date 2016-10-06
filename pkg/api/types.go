@@ -39,6 +39,14 @@ type sendParams struct {
 	Body shared.Email `json:"body"`
 }
 
+// swagger:parameters trackParams
+type trackParams struct {
+	// Email ID
+	// in: query
+	// Required: true
+	ID int64 `json:"id"`
+}
+
 // swagger:response errorResponse
 type errorResponse struct {
 	Message string `json:"message"`
@@ -51,5 +59,5 @@ type tokenResponse struct {
 
 // swagger:response sendResponse
 type sendResponse struct {
-	ID int64 `json:"id,omitempty"`
+	Status bool `json:"status"`
 }

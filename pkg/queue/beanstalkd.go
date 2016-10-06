@@ -9,10 +9,14 @@ import (
 
 var (
 	queueEmails = "emails"
+	queueOpen   = "open"
 )
 
-// Callback func type
-type Callback func(email *shared.Email)
+// SendCallback func type
+type SendCallback func(email *shared.Email)
+
+// OpenCallback func type
+type OpenCallback func(email *shared.OpenEmail)
 
 // BeanstalkdClient struct
 type BeanstalkdClient struct {
@@ -43,34 +47,88 @@ func (s *BeanstalkdClient) SendEmailJob(email *shared.Email) error {
 		Conn: s.Conn,
 		Name: queueEmails,
 	}
-	id, err = tube.Put(data, 1, 0, time.Minute)
+	id, err = tube.Put(data, 1, 0, time.Second)
 	if err == nil {
-		shared.Logf("Sent Job Id: %d", id)
+		shared.Logf("Sent Send Job Id: %d", id)
+	}
+
+	return err
+}
+
+// SendOpenJob func
+func (s *BeanstalkdClient) SendOpenJob(openEmail *shared.OpenEmail) error {
+	var (
+		id   uint64
+		err  error
+		data []byte
+	)
+
+	data, err = json.Marshal(openEmail)
+	if err != nil {
+		return err
+	}
+
+	tube := &beanstalk.Tube{
+		Conn: s.Conn,
+		Name: queueOpen,
+	}
+	id, err = tube.Put(data, 1, 0, time.Second)
+	if err == nil {
+		shared.Logf("Sent Open Job Id: %d", id)
 	}
 
 	return err
 }
 
 // ReceiveEmails func
-func (s *BeanstalkdClient) ReceiveEmails(callback Callback) {
+func (s *BeanstalkdClient) ReceiveEmails(callback SendCallback) {
 	tube := beanstalk.NewTubeSet(s.Conn, queueEmails)
 
 	for {
-		id, job, err := tube.Reserve(time.Minute)
+		id, job, err := tube.Reserve(time.Second)
 		if err == nil {
-			processErr := s.ProcessJob(id, job, callback)
+			processErr := s.ProcessSendEmailJob(id, job, callback)
 			if processErr != nil {
-				shared.Logf("Unable to process job id=%d. Details: %s", id, processErr.Error())
+				shared.Logf("Unable to process Send job id=%d. Details: %s", id, processErr.Error())
 			}
 		}
 	}
 }
 
-// ProcessJob func
-func (s *BeanstalkdClient) ProcessJob(id uint64, job []byte, callback Callback) error {
-	shared.Logf("Processing Job Id: %d", id)
+// ReceiveOpenEmails func
+func (s *BeanstalkdClient) ReceiveOpenEmails(callback OpenCallback) {
+	tube := beanstalk.NewTubeSet(s.Conn, queueOpen)
+
+	for {
+		id, job, err := tube.Reserve(time.Second)
+		if err == nil {
+			processErr := s.ProcessOpenEmailJob(id, job, callback)
+			if processErr != nil {
+				shared.Logf("Unable to process Open job id=%d. Details: %s", id, processErr.Error())
+			}
+		}
+	}
+}
+
+// ProcessSendEmailJob func
+func (s *BeanstalkdClient) ProcessSendEmailJob(id uint64, job []byte, callback SendCallback) error {
+	shared.Logf("Processing Send Job Id: %d", id)
 
 	email := new(shared.Email)
+	err := json.Unmarshal(job, email)
+
+	s.DeleteJob(id)
+
+	go callback(email)
+
+	return err
+}
+
+// ProcessOpenEmailJob func
+func (s *BeanstalkdClient) ProcessOpenEmailJob(id uint64, job []byte, callback OpenCallback) error {
+	shared.Logf("Processing Open Job Id: %d", id)
+
+	email := new(shared.OpenEmail)
 	err := json.Unmarshal(job, email)
 
 	s.DeleteJob(id)

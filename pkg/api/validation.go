@@ -86,3 +86,11 @@ func validateSendParams(p sendParams) error {
 
 	return nil
 }
+
+func validateTrackParams(p trackParams) error {
+	if p.ID < 1 {
+		return fmt.Errorf("'id' cannot be empty")
+	}
+
+	return nil
+}

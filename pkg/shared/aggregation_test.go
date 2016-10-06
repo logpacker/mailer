@@ -1,4 +1,4 @@
-package api
+package shared
 
 import "testing"
 
@@ -10,7 +10,7 @@ func TestInsertNth(t *testing.T) {
 	}
 
 	for original, validRes := range hash {
-		res := insertNth(original, 5, "@")
+		res := InsertNth(original, 5, "@")
 		if validRes != res {
 			t.Errorf("Result is not equal to valid result. Res: %s", res)
 		}

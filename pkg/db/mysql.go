@@ -20,6 +20,9 @@ var (
 
 	// StatusFailedToSend var
 	StatusFailedToSend = "Failed to Sent"
+
+	// StatusOpened var
+	StatusOpened = "Opened"
 )
 
 // MySQLClient struct
@@ -39,6 +42,8 @@ func (s *MySQLClient) Init(addr string) error {
 		s.Stmts["insert_address"], _ = s.Conn.Prepare("INSERT INTO address (email, name, is_sender) VALUES (?, ?, ?)")
 		s.Stmts["insert_email"], _ = s.Conn.Prepare("INSERT INTO email (`from`, `to`, subject, body, url_unsubscribe) VALUES (?, ?, ?, ?, ?)")
 		s.Stmts["update_email_status"], _ = s.Conn.Prepare("UPDATE email AS e, (SELECT id FROM status where name = ?) AS s SET e.status = s.id WHERE e.id = ?")
+		s.Stmts["update_email_sent_at"], _ = s.Conn.Prepare("UPDATE email SET sent_at = NOW() WHERE id = ?")
+		s.Stmts["update_email_opened_at"], _ = s.Conn.Prepare("UPDATE email SET opened_at = NOW() WHERE id = ?")
 		s.Stmts["get_emails_by_status"], _ = s.Conn.Prepare("SELECT *, a1.email AS a1_email, a1.name AS a1_name, a2.email AS a2_email, a2.name AS a2_name FROM email AS e INNER JOIN address AS a1 ON e.`from` = a1.id INNER JOIN address AS a2 ON e.`to` = a2.id INNER JOIN status AS s ON e.status = s.id WHERE s.name = ?")
 	}
 
@@ -75,6 +80,18 @@ func (s *MySQLClient) SaveEmail(email *shared.Email) error {
 // UpdateStatus func
 func (s *MySQLClient) UpdateStatus(email *shared.Email, status string) error {
 	_, err := s.Stmts["update_email_status"].Exec(status, email.ID)
+	return err
+}
+
+// UpdateSentAt func
+func (s *MySQLClient) UpdateSentAt(email *shared.Email) error {
+	_, err := s.Stmts["update_email_sent_at"].Exec(email.ID)
+	return err
+}
+
+// UpdateOpenedAt func
+func (s *MySQLClient) UpdateOpenedAt(email *shared.Email) error {
+	_, err := s.Stmts["update_email_opened_at"].Exec(email.ID)
 	return err
 }
 

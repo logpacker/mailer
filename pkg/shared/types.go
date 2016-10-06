@@ -2,6 +2,14 @@ package shared
 
 import "time"
 
+// MailerConfig struct
+type MailerConfig struct {
+	SMTPAddr       string
+	MySQLAddr      string
+	BeanstalkdAddr string
+	APIPublicProxy string
+}
+
 // Email struct
 type Email struct {
 	ID             int64      `json:"id,omitempty"`
@@ -14,6 +22,11 @@ type Email struct {
 	CreatedAt      *time.Time `json:"created_at,omitempty"`
 	SentAt         *time.Time `json:"sent_at,omitempty"`
 	OpenedAt       *time.Time `json:"opened_at,omitempty"`
+}
+
+// OpenEmail struct
+type OpenEmail struct {
+	ID int64 `json:"id,omitempty"`
 }
 
 // Address struct

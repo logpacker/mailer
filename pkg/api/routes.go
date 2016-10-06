@@ -3,11 +3,10 @@ package api
 import (
 	"encoding/json"
 	"github.com/gocraft/web"
-	"github.com/logpacker/mailer/pkg/conf"
-	"github.com/logpacker/mailer/pkg/db"
 	"github.com/logpacker/mailer/pkg/queue"
 	"github.com/logpacker/mailer/pkg/shared"
 	"net/http"
+	"strconv"
 	"sync"
 )
 
@@ -15,7 +14,6 @@ var (
 	tokensMu    sync.Mutex
 	tokens      map[string]string
 	validAPIKey string
-	dbClient    *db.MySQLClient
 	queueClient *queue.BeanstalkdClient
 )
 
@@ -25,7 +23,7 @@ type Context struct{}
 func (c *Context) checkToken(w web.ResponseWriter, r *web.Request, next web.NextMiddlewareFunc) {
 	r.ParseForm()
 
-	if r.URL.Path != "/v1/token" {
+	if r.URL.Path != "/v1/token" && r.URL.Path != "/v1/track" {
 		p := accessParams{
 			APIKey: r.FormValue("api_key"),
 			Token:  r.FormValue("token"),
@@ -60,14 +58,9 @@ func (c *Context) writeErrorResponse(w web.ResponseWriter, r *web.Request, err e
 }
 
 // NewRouter - constructor
-func NewRouter(apiKey string, conf *conf.MailerConfig) *web.Router {
+func NewRouter(apiKey string, conf *shared.MailerConfig) *web.Router {
 	validAPIKey = apiKey
 	tokens = make(map[string]string)
-	dbClient = new(db.MySQLClient)
-	dbErr := dbClient.Init(conf.MySQLAddr)
-	if dbErr != nil {
-		panic(dbErr)
-	}
 
 	queueClient = new(queue.BeanstalkdClient)
 	queueErr := queueClient.Init(conf.BeanstalkdAddr)
@@ -79,7 +72,8 @@ func NewRouter(apiKey string, conf *conf.MailerConfig) *web.Router {
 		Middleware(web.LoggerMiddleware).
 		Middleware((*Context).checkToken).
 		Get("/v1/token", (*Context).token).
-		Post("/v1/send", (*Context).send)
+		Post("/v1/send", (*Context).send).
+		Get("/v1/track", (*Context).track)
 
 	return router
 }
@@ -151,18 +145,6 @@ func (c *Context) send(w web.ResponseWriter, r *web.Request) {
 		return
 	}
 
-	prepareErr := prepareEmail(&b)
-	if prepareErr != nil {
-		c.writeErrorResponse(w, r, prepareErr)
-		return
-	}
-
-	saveErr := dbClient.SaveEmail(&b)
-	if saveErr != nil {
-		c.writeErrorResponse(w, r, saveErr)
-		return
-	}
-
 	queueErr := queueClient.SendEmailJob(&b)
 	if queueErr != nil {
 		c.writeErrorResponse(w, r, queueErr)
@@ -170,6 +152,31 @@ func (c *Context) send(w web.ResponseWriter, r *web.Request) {
 	}
 
 	c.writeResponse(w, r, sendResponse{
-		ID: b.ID,
+		Status: true,
 	})
+}
+
+// swagger:route POST /v1/track trackParams
+//
+// Mark email as opened by Client when tracker image is loaded
+//
+//     Produces:
+//     - image/png
+//
+//     Schemes: http
+func (c *Context) track(w web.ResponseWriter, r *web.Request) {
+	id, _ := strconv.Atoi(r.FormValue("id"))
+	p := trackParams{
+		ID: int64(id),
+	}
+
+	validateErr := validateTrackParams(p)
+	shared.LogErr(validateErr)
+
+	queueErr := queueClient.SendOpenJob(&shared.OpenEmail{
+		ID: p.ID,
+	})
+	shared.LogErr(queueErr)
+
+	c.writeResponse(w, r, nil)
 }

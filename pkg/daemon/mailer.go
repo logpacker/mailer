@@ -8,6 +8,7 @@ import (
 	"net/mail"
 	"net/smtp"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -15,6 +16,7 @@ import (
 type SMTPClient struct {
 	Addr string
 	Host string
+	Conf *shared.MailerConfig
 }
 
 // SMTPEmail struct
@@ -23,10 +25,11 @@ type SMTPEmail struct {
 	To      mail.Address
 	Headers map[string]string
 	Body    string
+	HTML    string
 }
 
 // BuildSMTPEmail func
-func BuildSMTPEmail(email *shared.Email) *SMTPEmail {
+func BuildSMTPEmail(email *shared.Email, conf *shared.MailerConfig) *SMTPEmail {
 	e := new(SMTPEmail)
 	e.From = mail.Address{
 		Address: email.From.Email,
@@ -52,7 +55,12 @@ func BuildSMTPEmail(email *shared.Email) *SMTPEmail {
 	e.Headers["List-Unsubscribe"] = "<" + email.URLUnsubscribe + ">"
 
 	// 1px tracker image
-	e.Body += "<img src=\"\" title=\"tracker-image\" width=1 height=1>"
+	e.Body += fmt.Sprintf("<img src=\"%s/v1/track?id=%d\" title=\"tracker-image\" width=1 height=1>", strings.TrimRight(conf.APIPublicProxy, "/"), email.ID)
+
+	e.HTML = fmt.Sprintf("<!doctype html><html><head>"+
+		"<meta name=\"viewport\" content=\"width=device-width\" />"+
+		"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"+
+		"<title>%s</title></head><body>%s</body></html>", email.Subject, e.Body)
 
 	return e
 }
@@ -69,7 +77,7 @@ func (s *SMTPClient) Send(smtpEmail *SMTPEmail) error {
 		body += fmt.Sprintf("%s: %s\r\n", k, v)
 	}
 
-	body += fmt.Sprintf("\r\n%s", base64.StdEncoding.EncodeToString([]byte(smtpEmail.Body)))
+	body += fmt.Sprintf("\r\n%s", base64.StdEncoding.EncodeToString([]byte(smtpEmail.HTML)))
 
 	c, dialErr := smtp.Dial(s.Addr)
 	if dialErr != nil {

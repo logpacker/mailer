@@ -1,10 +1,10 @@
 package daemon
 
 import (
-	"github.com/logpacker/mailer/pkg/conf"
 	"github.com/logpacker/mailer/pkg/db"
 	"github.com/logpacker/mailer/pkg/queue"
 	"github.com/logpacker/mailer/pkg/shared"
+	"sync"
 )
 
 var (
@@ -14,7 +14,7 @@ var (
 )
 
 // StartConsumer func
-func StartConsumer(conf *conf.MailerConfig) {
+func StartConsumer(conf *shared.MailerConfig) {
 	dbClient = new(db.MySQLClient)
 	dbErr := dbClient.Init(conf.MySQLAddr)
 	if dbErr != nil {
@@ -28,21 +28,38 @@ func StartConsumer(conf *conf.MailerConfig) {
 	}
 
 	smtpClient = new(SMTPClient)
+	smtpClient.Conf = conf
 	smtpClient.Init(conf.SMTPAddr)
 
-	queueClient.ReceiveEmails(SendEmail)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go queueClient.ReceiveEmails(SendEmail)
+	wg.Add(1)
+	go queueClient.ReceiveOpenEmails(OpenEmail)
+	wg.Wait()
 }
 
 // SendEmail used as a callback
 func SendEmail(email *shared.Email) {
 	var err error
+	err = shared.PrepareEmail(email)
+	shared.LogErr(err)
+	if err != nil {
+		return
+	}
+
+	err = dbClient.SaveEmail(email)
+	if err != nil {
+		return
+	}
+
 	err = dbClient.UpdateStatus(email, db.StatusProcessing)
 	shared.LogErr(err)
 	if err != nil {
 		return
 	}
 
-	smtpEmail := BuildSMTPEmail(email)
+	smtpEmail := BuildSMTPEmail(email, smtpClient.Conf)
 	err = smtpClient.Send(smtpEmail)
 	shared.LogErr(err)
 	resultStatus := db.StatusSent
@@ -51,5 +68,22 @@ func SendEmail(email *shared.Email) {
 	}
 
 	err = dbClient.UpdateStatus(email, resultStatus)
+	shared.LogErr(err)
+
+	err = dbClient.UpdateSentAt(email)
+	shared.LogErr(err)
+}
+
+// OpenEmail used as a callback
+func OpenEmail(openEmail *shared.OpenEmail) {
+	var err error
+	email := &shared.Email{
+		ID: openEmail.ID,
+	}
+
+	err = dbClient.UpdateStatus(email, db.StatusOpened)
+	shared.LogErr(err)
+
+	err = dbClient.UpdateOpenedAt(email)
 	shared.LogErr(err)
 }
