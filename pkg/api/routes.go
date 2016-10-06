@@ -7,6 +7,9 @@ import (
 	"github.com/gocraft/web"
 	"github.com/logpacker/mailer/pkg/queue"
 	"github.com/logpacker/mailer/pkg/shared"
+	"image"
+	"image/color"
+	"image/png"
 	"net/http"
 	"strconv"
 	"sync"
@@ -186,5 +189,9 @@ func (c *Context) track(w web.ResponseWriter, r *web.Request) {
 	})
 	shared.LogErr(queueErr)
 
-	c.writeResponse(w, r, nil)
+	img := image.NewRGBA(image.Rect(0, 0, 1, 1))
+	img.Set(1, 1, color.Transparent)
+
+	png.Encode(w, img)
+	w.Header().Set("Content-Type", "image/png")
 }
