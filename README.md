@@ -13,6 +13,7 @@
 #### Development
 
  * [go-swagger](https://github.com/go-swagger/go-swagger)
+ * `go generate cmd/api/main.go`
 
 #### Build & Deploy
 
@@ -26,7 +27,6 @@ glide i
 goose --env=live up
 go build -ldflags "-X main.Version=$(git rev-parse HEAD)" -o mailer_api cmd/api/main.go
 go build -ldflags "-X main.Version=$(git rev-parse HEAD)" -o mailer_daemon cmd/daemon/main.go
-go generate cmd/api/main.go
 ```
 
 #### Usage and Flags

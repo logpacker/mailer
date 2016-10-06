@@ -1,4 +1,3 @@
 mailer_api
 mailer_daemon
-cmd/api/swagger.json
 vendor/*
