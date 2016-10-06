@@ -1,6 +1,8 @@
 package api
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"github.com/gocraft/web"
 	"github.com/logpacker/mailer/pkg/queue"
@@ -8,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
+	"time"
 )
 
 var (
@@ -104,7 +107,12 @@ func (c *Context) token(w web.ResponseWriter, r *web.Request) {
 	}
 
 	tokensMu.Lock()
-	tokens[p.APIKey] = "token"
+	_, exists := tokens[p.APIKey]
+	if !exists {
+		h2 := sha1.New()
+		h2.Write([]byte(p.APIKey + time.Now().Format("20060102150405")))
+		tokens[p.APIKey] = hex.EncodeToString(h2.Sum(nil))
+	}
 	tokensMu.Unlock()
 
 	c.writeResponse(w, r, tokenResponse{

@@ -8,12 +8,12 @@
 
  * [goose](https://bitbucket.org/liamstask/goose/). Create a DB first: `CREATE DATABASE mailer CHARACTER SET utf8 COLLATE utf8_general_ci;`
  * [glide](https://github.com/Masterminds/glide)
- * `go test ./pkg/... -v -cover`
 
 #### Development
 
  * [go-swagger](https://github.com/go-swagger/go-swagger)
  * `go generate cmd/api/main.go`
+ * `go test ./pkg/... -v -cover`
 
 #### Build & Deploy
 
@@ -54,5 +54,37 @@ Mail statuses:
 ```bash
 curl -H "Content-Type: application/json" \
 -XPOST localhost:6100/v1/send \
--d '{"from": {"email": "mailer@logpacker.com", "name": "LogPacker"}, "to": {"email": "alexander.plutov@gmail.com"}, "subject": "Verify your email address", "Body": "<b>Thank you for the registration. Now please confirm it.</b>", "url_unsubscribe": "http://logpacker.com/unsubscribe"}'
+-d '{"from": {"email": "mailer@logpacker.com", "name": "LogPacker"}, "to": {"email": "alexander.plutov@gmail.com"}, "subject": "Verify your email address", "Body": "Thank you for the registration.<br/>Now please confirm it.", "url_unsubscribe": "https://logpacker.com"}'
+```
+
+#### Go Client example
+
+```go
+package main
+
+import (
+	"github.com/logpacker/mailer/pkg/client"
+)
+
+func main() {
+	// Error handling skipped for better readability
+	c, _ := client.New(client.Config{
+		URL:    "http://127.0.0.1:6100",
+		APIKey: "secret",
+	})
+
+	c.SendEmail(client.Email{
+		From: &client.Address{
+			Email: "mailer@logpacker.com",
+			Name:  "LogPacker",
+		},
+		To: &client.Address{
+			Email: "alexander.plutov@gmail.com",
+		},
+		Subject:        "Verify your email address",
+		Body:           "Thank you for the registration.<br/>Now please confirm it.",
+		URLUnsubscribe: "https://logpacker.com",
+	})
+}
+
 ```
