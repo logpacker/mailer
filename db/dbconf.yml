@@ -1,6 +1,0 @@
-development:
-  driver: mysql
-  open: root@tcp(127.0.0.1:3306)/mailer?charset=utf8&parseTime=true
-live:
-  driver: mysql
-  open: mailer:viHai8da@tcp(127.0.0.1:3306)/mailer?charset=utf8&parseTime=true

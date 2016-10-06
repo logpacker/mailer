@@ -1,19 +1,15 @@
 #### Dependencies
 
- * MySQL
+ * MySQL `CREATE DATABASE mailer CHARACTER SET utf8 COLLATE utf8_general_ci;` (import `db/schema.sql`)
  * SMTP
- * Beanstalkd
-
-#### Deployment dependencies:
-
- * [goose](https://bitbucket.org/liamstask/goose/). Create a DB first: `CREATE DATABASE mailer CHARACTER SET utf8 COLLATE utf8_general_ci;`
+ * [Beanstalkd](http://kr.github.io/beanstalkd/)
  * [glide](https://github.com/Masterminds/glide)
 
 #### Development
 
  * [go-swagger](https://github.com/go-swagger/go-swagger)
- * `go generate cmd/api/main.go`
- * `go test ./pkg/... -v -cover`
+ * Genereate swagger.json - `go generate cmd/api/main.go`
+ * Run tests - `go test ./pkg/... -v -cover`
 
 #### Build & Deploy
 
@@ -24,7 +20,6 @@ cd github.com/logpacker
 git clone git@github.com:logpacker/mailer.git
 cd mailer
 glide i
-goose --env=live up
 go build -ldflags "-X main.Version=$(git rev-parse HEAD)" -o mailer_api cmd/api/main.go
 go build -ldflags "-X main.Version=$(git rev-parse HEAD)" -o mailer_daemon cmd/daemon/main.go
 ```
