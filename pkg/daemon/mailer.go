@@ -40,9 +40,9 @@ func BuildSMTPEmail(email *shared.Email, conf *shared.MailerConfig) *SMTPEmail {
 		Name:    email.To.Name,
 	}
 	e.Headers = make(map[string]string)
-	e.Headers["From"] = e.To.String()
-	e.Headers["Reply-To"] = e.To.String()
-	e.Headers["Return-Path"] = e.To.String()
+	e.Headers["From"] = e.From.String()
+	e.Headers["Reply-To"] = e.From.String()
+	e.Headers["Return-Path"] = e.From.String()
 	e.Headers["To"] = e.To.String()
 	e.Headers["Subject"] = email.Subject
 	e.Headers["MIME-Version"] = "1.0"
