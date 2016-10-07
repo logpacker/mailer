@@ -28,6 +28,9 @@ type SMTPEmail struct {
 	HTML    string
 }
 
+// LineLimit const
+const LineLimit = 500
+
 // BuildSMTPEmail func
 func BuildSMTPEmail(email *shared.Email, conf *shared.MailerConfig) *SMTPEmail {
 	e := new(SMTPEmail)
@@ -77,6 +80,20 @@ func (s *SMTPClient) Init(addr string) {
 	s.Addr = addr
 }
 
+func (s *SMTPClient) insertNth(src string, n int, insert string) string {
+	var buffer bytes.Buffer
+	var n_1 = n - 1
+	var l_1 = len(src) - 1
+
+	for i, r := range src {
+		buffer.WriteRune(r)
+		if i%n == n_1 && i != l_1 {
+			buffer.WriteString(insert)
+		}
+	}
+	return buffer.String()
+}
+
 // Send func
 func (s *SMTPClient) Send(smtpEmail *SMTPEmail) error {
 	body := ""
@@ -84,7 +101,9 @@ func (s *SMTPClient) Send(smtpEmail *SMTPEmail) error {
 		body += fmt.Sprintf("%s: %s\r\n", k, v)
 	}
 
-	body += fmt.Sprintf("\r\n%s", base64.StdEncoding.EncodeToString([]byte(smtpEmail.HTML)))
+	b64 := base64.StdEncoding.EncodeToString([]byte(smtpEmail.HTML))
+	b64 = s.insertNth(b64, LineLimit, "\r\n")
+	body += fmt.Sprintf("\r\n%s", b64)
 
 	c, dialErr := smtp.Dial(s.Addr)
 	if dialErr != nil {
