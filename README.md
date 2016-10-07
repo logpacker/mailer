@@ -48,7 +48,7 @@ Mail statuses:
 
 ```bash
 curl -H "Content-Type: application/json" \
--XPOST localhost:6100/v1/send \
+-XPOST localhost:80/v1/send \
 -d '{"from": {"email": "mailer@logpacker.com", "name": "LogPacker"}, "to": {"email": "alexander.plutov@gmail.com"}, "subject": "Verify your email address", "Body": "Thank you for the registration.<br/>Now please confirm it.", "url_unsubscribe": "https://logpacker.com"}'
 ```
 
@@ -64,7 +64,7 @@ import (
 func main() {
 	// Error handling skipped for better readability
 	c, _ := client.New(client.Config{
-		URL:    "http://127.0.0.1:6100",
+		URL:    "http://127.0.0.1:80",
 		APIKey: "secret",
 	})
 

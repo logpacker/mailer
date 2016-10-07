@@ -1,7 +1,7 @@
 // Mailer API
 //
 //     Schemes: http
-//     Host: 127.0.0.1:6100
+//     Host: 127.0.0.1:80
 //     BasePath: /v1
 //     Version: 0.0.1
 //     Contact: pltvs@logpacker.com
@@ -35,7 +35,7 @@ func main() {
 	version := flag.Bool("v", false, "Build version (git revision)")
 	help := flag.Bool("h", false, "Usage & Help")
 	apiKey := flag.String("a", "", "Set secret api_key. If empty API will be accessible without token")
-	p := flag.String("p", "6100", "API port to bind")
+	p := flag.String("p", "80", "API port to bind")
 	b := flag.String("b", "127.0.0.1:11300", "Beanstalkd connection string")
 	flag.Parse()
 	if *help {
