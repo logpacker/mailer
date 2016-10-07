@@ -47,6 +47,7 @@ func SendEmail(email *shared.Email) {
 	if err != nil {
 		return
 	}
+	shared.Logf("Email saved. ID: %d, To: %s", email.ID, email.To.Email)
 
 	err = dbClient.UpdateStatus(email, db.StatusProcessing)
 	shared.LogErr(err)
@@ -76,6 +77,7 @@ func OpenEmail(openEmail *shared.OpenEmail) {
 		ID: openEmail.ID,
 	}
 
+	shared.Logf("Email opened. ID: %d", email.ID)
 	err = dbClient.UpdateStatus(email, db.StatusOpened)
 	shared.LogErr(err)
 

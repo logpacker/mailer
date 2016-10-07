@@ -115,7 +115,7 @@ func (s *BeanstalkdClient) ProcessSendEmailJob(id uint64, job []byte, callback S
 	email := new(shared.Email)
 	err := json.Unmarshal(job, email)
 
-	shared.Logf("Processing Send Job Id: %d. Email ID: %d", id, email.ID)
+	shared.Logf("Processing Send Job Id: %d", id)
 	s.DeleteJob(id)
 
 	go callback(email)
@@ -128,7 +128,7 @@ func (s *BeanstalkdClient) ProcessOpenEmailJob(id uint64, job []byte, callback O
 	email := new(shared.OpenEmail)
 	err := json.Unmarshal(job, email)
 
-	shared.Logf("Processing Open Job Id: %d. Email ID: %d", id, email.ID)
+	shared.Logf("Processing Open Job Id: %d", id)
 	s.DeleteJob(id)
 
 	go callback(email)
