@@ -1,5 +1,5 @@
-hash: 7a2abcdb66141408fad4a103a66b3ab69185288c3b3d6c76dd2fad3525a8481a
-updated: 2016-10-05T13:55:22.389897514+07:00
+hash: 204068d2fb2983c270d4b10b9a0ef41b88694260a39670cc060da775429ad496
+updated: 2016-10-07T10:36:49.89041278+07:00
 imports:
 - name: github.com/go-sql-driver/mysql
   version: 0b58b37b664c21f3010e836f1b931e1d0b0b0685
@@ -9,4 +9,8 @@ imports:
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/kr/beanstalk
   version: e99e1a384e4ace0401329ea37f702a2904990f91
+- name: golang.org/x/net
+  version: 88c1a61b3dd4d98651f24775ca288fac5d2544ce
+  subpackages:
+  - html
 devImports: []

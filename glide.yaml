@@ -3,3 +3,6 @@ import:
 - package: github.com/gocraft/web
 - package: github.com/gorilla/context
 - package: github.com/kr/beanstalk
+- package: golang.org/x/net
+  subpackages:
+  - html

@@ -42,11 +42,8 @@ func StartConsumer(conf *shared.MailerConfig) {
 // SendEmail used as a callback
 func SendEmail(email *shared.Email) {
 	var err error
-	err = shared.PrepareEmail(email)
+	email.Body = minifyHTML([]byte(email.Body))
 	shared.LogErr(err)
-	if err != nil {
-		return
-	}
 
 	err = dbClient.SaveEmail(email)
 	if err != nil {
