@@ -55,7 +55,7 @@ func BuildSMTPEmail(email *shared.Email, conf *shared.MailerConfig) *SMTPEmail {
 	e.Headers["List-Unsubscribe"] = "<" + email.URLUnsubscribe + ">"
 
 	// 1px tracker image
-	e.Body = fmt.Sprintf("%s<img src=\"%s/v1/track?id=%d\" title=\"tracker-image\" width=1 height=1>", email.Body, strings.TrimRight(conf.APIPublicProxy, "/"), email.ID)
+	e.Body = fmt.Sprintf("%s <img src=\"%s/v1/track?id=%d\" title=\"tracker-image\" width=1 height=1>", email.Body, strings.TrimRight(conf.APIPublicProxy, "/"), email.ID)
 
 	e.HTML = fmt.Sprintf("<!doctype html><html><head>"+
 		"<meta name=\"viewport\" content=\"width=device-width\" />"+
