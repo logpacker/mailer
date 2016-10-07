@@ -57,10 +57,17 @@ func BuildSMTPEmail(email *shared.Email, conf *shared.MailerConfig) *SMTPEmail {
 	// 1px tracker image
 	e.Body = fmt.Sprintf("%s <img src=\"%s/v1/track?id=%d\" title=\"tracker-image\" width=1 height=1>", email.Body, strings.TrimRight(conf.APIPublicProxy, "/"), email.ID)
 
-	e.HTML = fmt.Sprintf("<!doctype html><html><head>"+
-		"<meta name=\"viewport\" content=\"width=device-width\" />"+
-		"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"+
-		"<title>%s</title></head><body style=\"margin:0;padding:0\">%s</body></html>", email.Subject, e.Body)
+	e.HTML = fmt.Sprintf(`<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>%s</title>
+</head>
+<body style=margin:0;padding:0>
+%s
+</body>
+</html>`, email.Subject, e.Body)
 
 	return e
 }
