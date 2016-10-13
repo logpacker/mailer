@@ -82,12 +82,12 @@ func (s *SMTPClient) Init(addr string) {
 
 func (s *SMTPClient) insertNth(src string, n int, insert string) string {
 	var buffer bytes.Buffer
-	var n_1 = n - 1
-	var l_1 = len(src) - 1
+	var n1 = n - 1
+	var l1 = len(src) - 1
 
 	for i, r := range src {
 		buffer.WriteRune(r)
-		if i%n == n_1 && i != l_1 {
+		if i%n == n1 && i != l1 {
 			buffer.WriteString(insert)
 		}
 	}
