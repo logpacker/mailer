@@ -85,7 +85,7 @@ func (s *BeanstalkdClient) ReceiveEmails(callback SendCallback) {
 	tube := beanstalk.NewTubeSet(s.Conn, queueEmails)
 
 	for {
-		id, job, err := tube.Reserve(time.Second)
+		id, job, err := tube.Reserve(time.Millisecond * 100)
 		if err == nil {
 			processErr := s.ProcessSendEmailJob(id, job, callback)
 			if processErr != nil {
