@@ -45,6 +45,7 @@ func SendEmail(email *shared.Email) {
 
 	err = dbClient.SaveEmail(email)
 	if err != nil {
+		shared.Logf("Unable to save email into the DB. Detail: %s", err.Error())
 		return
 	}
 	shared.Logf("Email saved. ID: %d, To: %s", email.ID, email.To.Email)
