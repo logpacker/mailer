@@ -100,7 +100,7 @@ func (s *BeanstalkdClient) ReceiveOpenEmails(callback OpenCallback) {
 	tube := beanstalk.NewTubeSet(s.Conn, queueOpen)
 
 	for {
-		id, job, err := tube.Reserve(time.Second)
+		id, job, err := tube.Reserve(time.Millisecond * 100)
 		if err == nil {
 			processErr := s.ProcessOpenEmailJob(id, job, callback)
 			if processErr != nil {
