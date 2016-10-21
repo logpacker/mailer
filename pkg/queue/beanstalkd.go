@@ -50,6 +50,8 @@ func (s *BeanstalkdClient) SendEmailJob(email *shared.Email) error {
 	id, err = tube.Put(data, 1, 0, time.Second)
 	if err == nil {
 		shared.Logf("Sent Send Job Id: %d", id)
+	} else {
+		shared.LogErr(err)
 	}
 
 	return err
@@ -75,6 +77,8 @@ func (s *BeanstalkdClient) SendOpenJob(openEmail *shared.OpenEmail) error {
 	id, err = tube.Put(data, 1, 0, time.Second)
 	if err == nil {
 		shared.Logf("Sent Open Job Id: %d", id)
+	} else {
+		shared.LogErr(err)
 	}
 
 	return err
