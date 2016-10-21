@@ -20,6 +20,7 @@ func main() {
 	*db += "?charset=utf8&parseTime=true"
 	hn, _ := os.Hostname()
 	x := flag.String("x", "http://"+hn, "API public proxy for tracker picture")
+	c := flag.Int("c", 5, "Consumers count")
 	flag.Parse()
 	if *help {
 		flag.Usage()
@@ -35,6 +36,7 @@ func main() {
 	conf.MySQLAddr = *db
 	conf.BeanstalkdAddr = *b
 	conf.APIPublicProxy = *x
+	conf.ConsumersCount = *c
 
 	daemon.StartConsumer(conf)
 }

@@ -32,10 +32,12 @@ func StartConsumer(conf *shared.MailerConfig) {
 	smtpClient.Init(conf.SMTPAddr)
 
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go queueClient.ReceiveEmails(SendEmail)
-	wg.Add(1)
-	go queueClient.ReceiveOpenEmails(OpenEmail)
+	for i := 0; i < conf.ConsumersCount; i++ {
+		wg.Add(1)
+		go queueClient.ReceiveEmails(SendEmail)
+		wg.Add(1)
+		go queueClient.ReceiveOpenEmails(OpenEmail)
+	}
 	wg.Wait()
 }
 

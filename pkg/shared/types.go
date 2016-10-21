@@ -8,6 +8,7 @@ type MailerConfig struct {
 	MySQLAddr      string
 	BeanstalkdAddr string
 	APIPublicProxy string
+	ConsumersCount int
 }
 
 // Email struct
