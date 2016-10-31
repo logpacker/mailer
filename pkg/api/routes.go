@@ -57,6 +57,7 @@ func (c *Context) writeResponse(w web.ResponseWriter, r *web.Request, response i
 
 func (c *Context) writeErrorResponse(w web.ResponseWriter, r *web.Request, err error) {
 	if err != nil {
+		shared.LogErr(err)
 		c.writeResponse(w, r, errorResponse{
 			Message: err.Error(),
 		})
