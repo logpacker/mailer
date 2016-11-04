@@ -20,11 +20,12 @@ var (
 	tokensMu    sync.Mutex
 	tokens      map[string]string
 	validAPIKey string
-	queueClient *queue.BeanstalkdClient
 )
 
 // Context type
-type Context struct{}
+type Context struct {
+	QueueClient *queue.BeanstalkdClient
+}
 
 func (c *Context) checkToken(w web.ResponseWriter, r *web.Request, next web.NextMiddlewareFunc) {
 	r.ParseForm()
@@ -69,18 +70,19 @@ func NewRouter(apiKey string, conf *shared.MailerConfig) *web.Router {
 	validAPIKey = apiKey
 	tokens = make(map[string]string)
 
-	queueClient = new(queue.BeanstalkdClient)
-	queueErr := queueClient.Init(conf.BeanstalkdAddr)
+	ctx := new(Context)
+	ctx.QueueClient = new(queue.BeanstalkdClient)
+	queueErr := ctx.QueueClient.Init(conf.BeanstalkdAddr)
 	if queueErr != nil {
 		panic(queueErr)
 	}
 
 	router := web.New(Context{}).
 		Middleware(web.LoggerMiddleware).
-		Middleware((*Context).checkToken).
-		Get("/v1/token", (*Context).token).
-		Post("/v1/send", (*Context).send).
-		Get("/v1/track", (*Context).track)
+		Middleware(ctx.checkToken).
+		Get("/v1/token", ctx.token).
+		Post("/v1/send", ctx.send).
+		Get("/v1/track", ctx.track)
 
 	return router
 }
@@ -157,7 +159,7 @@ func (c *Context) send(w web.ResponseWriter, r *web.Request) {
 		return
 	}
 
-	queueErr := queueClient.SendEmailJob(&b)
+	queueErr := c.QueueClient.SendEmailJob(&b)
 	if queueErr != nil {
 		c.writeErrorResponse(w, r, queueErr)
 		return
@@ -185,7 +187,7 @@ func (c *Context) track(w web.ResponseWriter, r *web.Request) {
 	validateErr := validateTrackParams(p)
 	shared.LogErr(validateErr)
 
-	queueErr := queueClient.SendOpenJob(&shared.OpenEmail{
+	queueErr := c.QueueClient.SendOpenJob(&shared.OpenEmail{
 		ID: p.ID,
 	})
 	shared.LogErr(queueErr)

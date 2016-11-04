@@ -2,7 +2,6 @@ package shared
 
 import (
 	"log"
-	"time"
 )
 
 // LogErr func
@@ -14,5 +13,5 @@ func LogErr(err error) {
 
 // Logf func
 func Logf(format string, v ...interface{}) {
-	log.Printf("["+time.Now().Format(time.RFC822)+"]: "+format, v...)
+	log.Printf(format, v...)
 }
