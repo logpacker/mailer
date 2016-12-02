@@ -32,7 +32,6 @@ CREATE TABLE IF NOT EXISTS email (
   sent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   opened_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE INDEX email_unique (`from`, `to`, subject),
   INDEX email_from (`from`),
   INDEX email_to (`to`),
   INDEX email_status (status),
