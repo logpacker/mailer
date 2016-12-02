@@ -108,6 +108,11 @@ func (c *Client) SendEmail(email Email) error {
 
 	sr := sendResponse{}
 	err = c.api("/v1/send", "POST", body, &sr)
+	if err != nil {
+		c.GetToken()
+		err = c.api("/v1/send", "POST", body, &sr)
+	}
+
 	return err
 }
 
