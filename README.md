@@ -46,9 +46,14 @@ Mail statuses:
 
 #### CURL Example
 
+1. Retreive token
 ```bash
-curl -H "Content-Type: application/json" \
--XPOST localhost:80/v1/send \
+curl -H "Content-Type: application/json" -XGET 'http://localhost:80/v1/token?api_key=XXX'
+```
+
+2. Send email
+```bash
+curl -H "Content-Type: application/json" -XPOST 'http://localhost:80/v1/send?token=XXX&api_key=XXX' \
 -d '{"from": {"email": "mailer@logpacker.com", "name": "LogPacker"}, "to": {"email": "alexander.plutov@gmail.com"}, "subject": "Verify your email address", "Body": "Thank you for the registration.<br/>Now please confirm it.", "url_unsubscribe": "https://logpacker.com"}'
 ```
 
