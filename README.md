@@ -2,7 +2,7 @@
 
  * MySQL `CREATE DATABASE mailer CHARACTER SET utf8 COLLATE utf8_general_ci;` (import `db/schema.sql`)
  * SMTP
- * [Beanstalkd](http://kr.github.io/beanstalkd/)
+ * [Beanstalkd](http://kr.github.io/beanstalkd/) With 5MB job size limit
  * [glide](https://github.com/Masterminds/glide)
 
 #### Development
