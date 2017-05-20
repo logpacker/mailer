@@ -15,7 +15,7 @@ func main() {
 	version := flag.Bool("v", false, "Build version (git revision)")
 	help := flag.Bool("h", false, "Usage & Help")
 	smtp := flag.String("s", "localhost:25", "SMTP address")
-	db := flag.String("db", "mailer:viHai8da@tcp(127.0.0.1:3306)/mailer", "MySQL database connection string")
+	db := flag.String("db", "mailer:dppasword@tcp(127.0.0.1:3306)/mailer", "MySQL database connection string")
 	b := flag.String("b", "127.0.0.1:11300", "Beanstalkd connection string")
 	*db += "?charset=utf8&parseTime=true"
 	hn, _ := os.Hostname()
